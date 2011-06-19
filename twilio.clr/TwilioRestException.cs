@@ -1,6 +1,4 @@
-﻿
-
-using System;
+﻿using System;
 
 [Serializable()]
 public class TwilioRestException : System.Exception
