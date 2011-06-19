@@ -10,7 +10,7 @@ Currently it has a single method for sending SMS messages. Please help me implem
 
 Compile this CLR, deploy it to your SQL server, and execute the procedure:
 
-	declare @sid varchar()
+	declare @sid varchar(34)
 	exec SendSMSMessage 'api_version', 'account_id', 'auth_token', 'from_number', 'to_number', 'message_body', @sid output
 	print(@sid)
 
