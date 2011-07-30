@@ -1,7 +1,8 @@
-﻿using System;
-
-public interface IAccount
+﻿namespace twilio.clr
 {
-    string request(string path, string method);
-    string request(string path, string method, System.Collections.Hashtable vars);
+    public interface IAccount
+    {
+        string Request(string path, string method);
+        string Request(string path, string method, System.Collections.Hashtable vars);
+    }
 }

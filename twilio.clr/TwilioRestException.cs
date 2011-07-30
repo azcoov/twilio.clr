@@ -1,33 +1,35 @@
 ﻿using System;
 
-[Serializable()]
-public class TwilioRestException : System.Exception
+namespace twilio.clr
 {
-
-    public TwilioRestException()
-        : base()
+    [Serializable]
+    public class TwilioRestException : Exception
     {
 
+        public TwilioRestException()
+        {
+
+        }
+
+        public TwilioRestException(string message)
+            : base(message)
+        {
+
+        }
+
+        public TwilioRestException(string message,
+                                   Exception innerException)
+            : base(message, innerException)
+        {
+
+        }
+
+        protected TwilioRestException(System.Runtime.Serialization.SerializationInfo info,
+                                      System.Runtime.Serialization.StreamingContext context)
+            : base(info, context)
+        {
+
+        }
+
     }
-
-    public TwilioRestException(string message)
-        : base(message)
-    {
-
-    }
-
-    public TwilioRestException(string message,
-                               System.Exception innerException)
-        : base(message, innerException)
-    {
-
-    }
-
-    protected TwilioRestException(System.Runtime.Serialization.SerializationInfo info,
-                                  System.Runtime.Serialization.StreamingContext context)
-        : base(info, context)
-    {
-
-    }
-
 }

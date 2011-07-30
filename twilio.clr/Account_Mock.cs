@@ -2,14 +2,14 @@
 
 namespace twilio.clr
 {
-    public class Account_Mock : IAccount
+    public class AccountMock : IAccount
     {
-        public string request(string path, string method)
+        public string Request(string path, string method)
         {
             throw new NotImplementedException();
         }
 
-        public string request(string path, string method, System.Collections.Hashtable vars)
+        public string Request(string path, string method, System.Collections.Hashtable vars)
         {
             if (path.Contains("") && method == "POST")
             {

@@ -1,25 +1,12 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using twilio.clr;
 
 namespace test.twilio.clr
 {
-    [TestClass()]
+    [TestClass]
     public class StoredProceduresTest
     {
-        private TestContext testContextInstance;
-
-        public TestContext TestContext
-        {
-            get
-            {
-                return testContextInstance;
-            }
-            set
-            {
-                testContextInstance = value;
-            }
-        }
+        public TestContext TestContext { get; set; }
 
         #region Additional test attributes
         // 
@@ -51,19 +38,19 @@ namespace test.twilio.clr
         //
         #endregion
 
-        [TestMethod()]
+        [TestMethod]
         public void SendSMSMessageTest()
         {
-            string apiVersion = "2010-04-01";
-            string accountSid = "fake_sid";
-            string authToken = "fake_auth_token";
-            string from = "fake_from";
-            string to = "fake_to";
-            string body = "fake_body";
-            string sid = String.Empty; //sid for new text message
-            string sidExpected = "SM90c6fc909d8504d45ecdb3a3d5b3556e"; // sid from sample xml http://www.twilio.com/docs/api/rest/sending-smsdocumentation
+            const string apiVersion = "2010-04-01";
+            const string accountSid = "fake_sid";
+            const string authToken = "fake_auth_token";
+            const string @from = "fake_from";
+            const string to = "fake_to";
+            const string body = "fake_body";
+            string sid; //sid for new text message
+            const string sidExpected = "SM90c6fc909d8504d45ecdb3a3d5b3556e"; // sid from sample xml http://www.twilio.com/docs/api/rest/sending-smsdocumentation
 
-            StoredProcedures procedures = new StoredProcedures(new Account_Mock());
+            var procedures = new StoredProcedures(new AccountMock());
             procedures.SendSMSMessage(apiVersion, accountSid, authToken, from, to, body, out sid);
             Assert.AreEqual(sidExpected, sid);
         }

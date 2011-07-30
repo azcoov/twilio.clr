@@ -1,159 +1,149 @@
 ﻿using System;
 using System.Collections;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
 
-public class Account : IAccount
+namespace twilio.clr
 {
-    const string TWILIO_API_URL = "https://api.twilio.com";
-
-    private string id;
-    private string token;
-
-    public Account(string id, string token)
+    public class Account : IAccount
     {
-        this.id = id;
-        this.token = token;
-    }
+        const string TwilioApiUrl = "https://api.twilio.com";
 
-    private string _download(string uri, Hashtable vars)
-    {
-        // 1. format query string
-        if (vars != null)
+        private readonly string _id;
+        private readonly string _token;
+
+        public Account(string id, string token)
         {
-            string query = "";
-            foreach (DictionaryEntry d in vars)
-                query += "&" + d.Key.ToString() + "=" + d.Value.ToString();
-            if (query.Length > 0)
-                uri = uri + "?" + query.Substring(1);
+            _id = id;
+            _token = token;
         }
 
-        // 2. setup basic authenication
-        string authstring = Convert.ToBase64String(
-            Encoding.ASCII.GetBytes(String.Format("{0}:{1}",
-            this.id, this.token)));
-
-        // 3. perform GET using WebClient
-        WebClient client = new WebClient();
-        client.Headers.Add("Authorization",
-            String.Format("Basic {0}", authstring));
-        byte[] resp = client.DownloadData(uri);
-
-        return Encoding.ASCII.GetString(resp);
-    }
-
-    private string _upload(string uri, string method, Hashtable vars)
-    {
-        // 1. format body data
-        string data = "";
-        if (vars != null)
+        private string Download(string uri, Hashtable vars)
         {
-            foreach (DictionaryEntry d in vars)
+            // 1. format query string
+            if (vars != null)
             {
-                data += d.Key.ToString() + "=" + d.Value.ToString() + "&";
+                var query = vars.Cast<DictionaryEntry>().Aggregate("", (current, d) => current + ("&" + d.Key.ToString() + "=" + d.Value.ToString()));
+                if (query.Length > 0)
+                    uri = uri + "?" + query.Substring(1);
             }
 
+            // 2. setup basic authenication
+            var authstring = Convert.ToBase64String(
+                Encoding.ASCII.GetBytes(String.Format("{0}:{1}",
+                                                      _id, _token)));
+
+            // 3. perform GET using WebClient
+            var client = new WebClient();
+            client.Headers.Add("Authorization",
+                               String.Format("Basic {0}", authstring));
+            var resp = client.DownloadData(uri);
+
+            return Encoding.ASCII.GetString(resp);
         }
 
-        // 2. setup basic authenication
-        string authstring = Convert.ToBase64String(Encoding.ASCII.GetBytes(String.Format("{0}:{1}", this.id, this.token)));
-
-        // 3. perform POST/PUT/DELETE using WebClient
-        ServicePointManager.Expect100Continue = false;
-        Byte[] postbytes = Encoding.ASCII.GetBytes(data);
-        WebClient client = new WebClient();
-
-        client.Headers.Add("Authorization", String.Format("Basic {0}", authstring));
-        client.Headers.Add("Content-Type", "application/x-www-form-urlencoded");
-
-        byte[] resp = client.UploadData(uri, method, postbytes);
-
-        return Encoding.ASCII.GetString(resp);
-    }
-
-    private string _build_uri(string path)
-    {
-        if (path[0] == '/')
-            return TWILIO_API_URL + path;
-        else
-            return TWILIO_API_URL + "/" + path;
-    }
-
-    public string request(string path, string method, Hashtable vars)
-    {
-        string response = null;
-
-        if (path == null || path.Length <= 0)
-            throw (new ArgumentException("Invalid path parameter"));
-
-        method = method.ToUpper();
-        if (method == null || (method != "GET" && method != "POST" && method != "PUT" && method != "DELETE"))
+        private string Upload(string uri, string method, Hashtable vars)
         {
-            throw (new ArgumentException("Invalid method parameter"));
+            // 1. format body data
+            var data = "";
+            if (vars != null)
+            {
+                data = vars.Cast<DictionaryEntry>().Aggregate(data, (current, d) => current + (d.Key.ToString() + "=" + d.Value.ToString() + "&"));
+            }
+
+            // 2. setup basic authenication
+            var authstring = Convert.ToBase64String(Encoding.ASCII.GetBytes(String.Format("{0}:{1}", _id, _token)));
+
+            // 3. perform POST/PUT/DELETE using WebClient
+            ServicePointManager.Expect100Continue = false;
+            var postbytes = Encoding.ASCII.GetBytes(data);
+            var client = new WebClient();
+
+            client.Headers.Add("Authorization", String.Format("Basic {0}", authstring));
+            client.Headers.Add("Content-Type", "application/x-www-form-urlencoded");
+
+            var resp = client.UploadData(uri, method, postbytes);
+
+            return Encoding.ASCII.GetString(resp);
         }
 
-        if (method != "GET" && vars.Count <= 0)
+        private string _build_uri(string path)
         {
-            throw (new ArgumentException("No vars parameters"));
+            if (path[0] == '/')
+                return TwilioApiUrl + path;
+            return TwilioApiUrl + "/" + path;
         }
 
-        string url = _build_uri(path);
-        try
+        public string Request(string path, string method, Hashtable vars)
         {
-            if (method == "GET")
-            {
-                response = _download(url, vars);
-            }
-            else
-            {
-                response = _upload(url, method, vars);
-            }
-        }
-        catch (WebException e)
-        {
-            string message = e.Message;
+            string response;
 
-            switch (e.Status)
+            if (path == null || path.Length <= 0)
+                throw (new ArgumentException("Invalid path parameter"));
+
+            method = method.ToUpper();
+            if (method == null || (method != "GET" && method != "POST" && method != "PUT" && method != "DELETE"))
             {
-                case WebExceptionStatus.TrustFailure:
-                    message = "You do not trust the people who issued the certificate being used by twiliorest.dll.";
-                    break;
+                throw (new ArgumentException("Invalid method parameter"));
             }
 
-            string var_list = "";
-            foreach (DictionaryEntry d in vars)
+            if (method != "GET" && vars.Count <= 0)
             {
-                var_list += "&" + d.Key.ToString() + "=" + d.Value.ToString();
+                throw (new ArgumentException("No vars parameters"));
             }
 
-
-            string response_str = "";
-            using (StreamReader sr = new StreamReader(e.Response.GetResponseStream()))
+            var url = _build_uri(path);
+            try
             {
-                string line;
-                while ((line = sr.ReadLine()) != null)
+                response = method == "GET" ? Download(url, vars) : Upload(url, method, vars);
+            }
+            catch (WebException e)
+            {
+                var message = e.Message;
+
+                switch (e.Status)
                 {
-                    response_str += line;
+                    case WebExceptionStatus.TrustFailure:
+                        message = "You do not trust the people who issued the certificate being used by twiliorest.dll.";
+                        break;
                 }
+
+                var varList = vars.Cast<DictionaryEntry>().Aggregate("", (current, d) => current + ("&" + d.Key.ToString() + "=" + d.Value.ToString()));
+
+
+                var responseStr = "";
+                Stream responseStream = null;
+                if (e.Response != null)
+                    responseStream = e.Response.GetResponseStream();
+                if (responseStream != null)
+                    using (var sr = new StreamReader(responseStream))
+                    {
+                        string line;
+                        while ((line = sr.ReadLine()) != null)
+                        {
+                            responseStr += line;
+                        }
+                    }
+
+
+                message = String.Format("TwilioRestException occurred in the request you sent: \n{0}\n\tURLL: {1}\n\tMETHOD:{2}\n\tVARS:{3}\n\tRESPONSE:{4}",
+                                        message,
+                                        url,
+                                        method,
+                                        varList,
+                                        responseStr);
+
+                throw new TwilioRestException(message, e);
             }
 
-
-            message = String.Format("TwilioRestException occurred in the request you sent: \n{0}\n\tURLL: {1}\n\tMETHOD:{2}\n\tVARS:{3}\n\tRESPONSE:{4}",
-                                    message,
-                                    url,
-                                    method,
-                                    var_list,
-                                    response_str);
-
-            throw new TwilioRestException(message, e);
+            return response;
         }
 
-        return response;
-    }
-
-    public string request(string path, string method)
-    {
-        return this.request(path, method, null);
+        public string Request(string path, string method)
+        {
+            return Request(path, method, null);
+        }
     }
 }
