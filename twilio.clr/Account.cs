@@ -27,7 +27,9 @@ namespace twilio.clr
             {
                 var query = vars.Cast<DictionaryEntry>().Aggregate("", (current, d) => current + ("&" + d.Key.ToString() + "=" + d.Value.ToString()));
                 if (query.Length > 0)
+                {
                     uri = uri + "?" + query.Substring(1);
+                }
             }
 
             // 2. setup basic authenication
@@ -52,6 +54,10 @@ namespace twilio.clr
             {
                 data = vars.Cast<DictionaryEntry>().Aggregate(data, (current, d) => current + (d.Key.ToString() + "=" + d.Value.ToString() + "&"));
             }
+
+            // Replace plus values in to and from numbers
+            // For some reason URL encoding and HTML encoding don't work :S
+            data = data.Replace("+", "%2B");
 
             // 2. setup basic authenication
             var authstring = Convert.ToBase64String(Encoding.ASCII.GetBytes(String.Format("{0}:{1}", _id, _token)));
