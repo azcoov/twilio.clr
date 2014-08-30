@@ -54,5 +54,23 @@ namespace test.twilio.clr
             procedures.SendSMSMessage(apiVersion, accountSid, authToken, from, to, body, out sid);
             Assert.AreEqual(sidExpected, sid);
         }
+
+        [TestMethod]
+        public void MakeOutgoingCallTest()
+        {
+            const string apiVersion = "2010-04-01";
+            const string accountSid = "fake_sid";
+            const string authToken = "fake_auth_token";
+            const string @from = "fake_from";
+            const string to = "fake_to";
+            const string body = "fake_body";
+            string sid; //sid for new text message
+            const string url = "http://demo.twilio.com/docs/voice.xml";
+            const string sidExpected = "CAa346467ca321c71dbd5e12f627deb854"; // sid from sample xml http://www.twilio.com/docs/api/rest/sending-smsdocumentation
+
+            var procedures = new StoredProcedures(new AccountMock());
+            procedures.makeOutgoingCall(apiVersion, accountSid, authToken, from, to, url, out sid);
+            Assert.AreEqual(sidExpected, sid);
+        }
     }
 }

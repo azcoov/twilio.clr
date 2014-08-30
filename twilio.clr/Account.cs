@@ -27,7 +27,9 @@ namespace twilio.clr
             {
                 var query = vars.Cast<DictionaryEntry>().Aggregate("", (current, d) => current + ("&" + d.Key.ToString() + "=" + d.Value.ToString()));
                 if (query.Length > 0)
+                {
                     uri = uri + "?" + query.Substring(1);
+                }
             }
 
             // 2. setup basic authenication
