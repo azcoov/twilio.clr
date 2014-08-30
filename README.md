@@ -4,9 +4,8 @@ SQL CLR for calling the [Twilio REST API](http://www.twilio.com/docs/api/rest/)
 
 ## Available Methods
 
-Currently it has a single method for sending SMS messages. Please help me implement the other API methods.
-
-To use any of these functions first compile this CLR, deploy it to your SQL server, and execute the procedure you want to run
+To use any of these functions first compile this CLR, deploy it to your SQL server, and execute the procedure you want to run.
+You will need the System.Web assembly available on your SQL Server to deploy it.
 
 ## Sending a message
 
